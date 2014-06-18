@@ -74,6 +74,11 @@ describe('XHRConnection', function() {
 
 
   describe('.send()', function() {
+    var sendSpy
+    beforeEach(function() {
+      sendSpy = spyOn(XMLHttpRequest.prototype, 'send');
+    });
+
     it('should add load and error event listeners', function() {
       var listenerSpy = spyOn(XMLHttpRequest.prototype, 'addEventListener');
       var connection = new XHRConnection();
@@ -85,69 +90,58 @@ describe('XHRConnection', function() {
     });
 
 
-    it('should complain if the connection has not been opened', function() {
-
-    });
-
-
     it('should accept no data', function() {
-      var spy = spyOn(XMLHttpRequest.prototype, 'send');
       var connection = new XHRConnection();
       connection.open('POST', '/assets');
       connection.send();
-      expect(spy).toHaveBeenCalled();
+      expect(sendSpy).toHaveBeenCalled();
     });
 
 
     it('should accept DataView data', function() {
-      var spy = spyOn(XMLHttpRequest.prototype, 'send');
       var buffer = new ArrayBuffer();
       var view = new DataView(buffer);
       var connection = new XHRConnection();
       connection.open('POST', '/assets');
       connection.send(view);
-      expect(spy).toHaveBeenCalledWith(view);
+      expect(sendSpy).toHaveBeenCalledWith(view);
     });
 
 
     it('should accept Blob data', function() {
-      var spy = spyOn(XMLHttpRequest.prototype, 'send');
       var blob = new Blob();
       var connection = new XHRConnection();
       connection.open('POST', '/assets');
       connection.send(blob);
-      expect(spy).toHaveBeenCalledWith(blob);
+      expect(sendSpy).toHaveBeenCalledWith(blob);
     });
 
 
     it('should accept Document data', function() {
-      var spy = spyOn(XMLHttpRequest.prototype, 'send');
       var connection = new XHRConnection();
       var doc = document.implementation.createDocument(null, 'doc');
       connection.open('POST', '/assets');
       connection.send(doc);
-      expect(spy).toHaveBeenCalledWith(doc);
+      expect(sendSpy).toHaveBeenCalledWith(doc);
     });
 
 
     it('should accept String data', function() {
-      var spy = spyOn(XMLHttpRequest.prototype, 'send');
       var connection = new XHRConnection();
       var body = 'POST ME!';
       connection.open('POST', '/assets');
       connection.send(body);
-      expect(spy).toHaveBeenCalledWith(body);
+      expect(sendSpy).toHaveBeenCalledWith(body);
     });
 
 
     it('should accept FormData data', function() {
-      var spy = spyOn(XMLHttpRequest.prototype, 'send');
       var connection = new XHRConnection();
       var formData = new FormData();
       formData.append('user', 'Jeff');
       connection.open('POST', '/assets');
       connection.send(formData);
-      expect(spy).toHaveBeenCalledWith(formData);
+      expect(sendSpy).toHaveBeenCalledWith(formData);
     });
 
 
@@ -181,6 +175,7 @@ describe('XHRConnection', function() {
     it('should unregister load and error events', function() {
       var addListenerSpy = spyOn(XMLHttpRequest.prototype, 'addEventListener');
       var removedListenerSpy = spyOn(XMLHttpRequest.prototype, 'removeEventListener');
+      var sendSpy = spyOn(XMLHttpRequest.prototype, 'send');
       var connection = new XHRConnection();
       connection.open('GET', '/items');
       connection.send();
