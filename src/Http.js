@@ -2,26 +2,31 @@ import {XHRConnection} from './XHRConnection';
 import {assert} from 'assert';
 import {serialize} from './Serialize';
 import {toQueryString} from './QueryParams';
+import {Provide} from 'di/annotations';
 
-//TODO (@jeffbcross): support responseType in options
-function request(method, url, options) {
-  var queryParams, requestData, connection;
-  assert.type(method, assert.string);
-  assert.type(url, assert.string);
+class Http {
+  constructor () {
+  }
 
-  queryParams = (options && options.params || {});
-  requestData = (options && options.data);
-  connection = new (options && options.ConnectionClass || XHRConnection)();
-  url = fullUrl(url, queryParams);
+  request (method:string, url:string, options) {
+    var queryParams, requestData, connection;
+    assert.type(method, assert.string);
+    assert.type(url, assert.string);
 
-  connection.open(method, url);
-  connection.send(serialize(requestData));
+    queryParams = (options && options.params || {});
+    requestData = (options && options.data);
+    connection = new (options && options.ConnectionClass || XHRConnection)();
+    url = this.fullUrl(url, queryParams);
 
-  return connection;
+    connection.open(method, url);
+    connection.send(serialize(requestData));
+
+    return connection;
+  }
+
+  fullUrl (url:string, params) {
+    return url + toQueryString(params, url.indexOf('?') > -1);
+  }
 }
 
-function fullUrl(url:string, params) {
-  return url + toQueryString(params, url.indexOf('?') > -1);
-}
-
-export {fullUrl, request};
+export {Http};
