@@ -220,6 +220,16 @@ describe('ConectionMock', function() {
       expect(connection.data).toBe(data);
     });
   });
+
+
+  describe('.setRequestHeader()', function() {
+    it('should call setRequestHeader on the backend', function() {
+      var spy = spyOn(ConnectionMockBackend, 'setRequestHeader');
+      var connection = new ConnectionMock();
+      connection.setRequestHeader('Foo', 'Bar');
+      expect(spy).toHaveBeenCalledWith('Foo', 'Bar');
+    });
+  });
 });
 
 

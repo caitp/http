@@ -15,6 +15,7 @@ var IConnection = assert.define('IConnection', function(value) {
     send: Function,
     then: Function,
     success: Function,
+    setRequestHeader: Function,
     error: Function
   }));
 

@@ -217,6 +217,16 @@ describe('XHRConnection', function() {
   });
 
 
+  describe('.setRequestHeader()', function() {
+    it('should call through to xhr_', function() {
+      var spy = spyOn(XMLHttpRequest.prototype, 'setRequestHeader');
+      var connection = new XHRConnection();
+      connection.setRequestHeader('Foo', 'Bar');
+      expect(spy).toHaveBeenCalledWith('Foo', 'Bar');
+    });
+  });
+
+
   describe('.success()', function() {
 
   });

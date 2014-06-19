@@ -65,6 +65,10 @@ export class XHRConnection {
     this.xhr_.open(this.method, this.url);
   }
 
+  setRequestHeader (key:string, value:string) {
+    this.xhr_.setRequestHeader(key, value);
+  }
+
   send (data) {
     this.xhr_.addEventListener('load', this.onLoad_.bind(this));
     this.xhr_.addEventListener('error', this.onError_.bind(this));

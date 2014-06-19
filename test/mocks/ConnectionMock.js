@@ -76,7 +76,12 @@ export class ConnectionMockBackend {
   static forkZone() {
     return PromiseBackend.forkZone();
   }
+
+  static setRequestHeader () {
+
+  }
 }
+
 
 export class ConnectionMock {
   constructor() {
@@ -105,5 +110,7 @@ export class ConnectionMock {
     //TODO: implement
   }
 
-
+  setRequestHeader (key:string, value:string) {
+    ConnectionMockBackend.setRequestHeader(key, value);
+  }
 }
