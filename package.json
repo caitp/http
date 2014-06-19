@@ -12,7 +12,7 @@
     "url": "https://github.com/angular/ngHttp/issues"
   },
   "dependencies": {
-    "traceur": "0.0.20",
+    "traceur": "0.0.45",
     "di": "~2.0.0-pre-2",
     "deferred": "git://github.com/angular/deferred"
   },
