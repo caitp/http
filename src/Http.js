@@ -16,7 +16,7 @@ class Http {
 
   request (config) {
     var connection, http = this;
-    var promise = new Promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
       var request, promise;
       var {method, url, params, data, headers, responseType} = config;
       assert.type(method, assert.string);
@@ -29,8 +29,8 @@ class Http {
         url: url,
         data: serialize(data),
         responseType: responseType || 'text',
-        params: new Map(),
-        headers: new Map()
+        params: objectToMap(params),
+        headers: objectToMap(headers)
       };
 
       function setHeaders() {
@@ -59,12 +59,6 @@ class Http {
         then(onResponse, onResponseError).
         then(resolve, reject);
     });
-
-    // TODO: Remove connection from promise.
-    // Only here to verify which Connection was used
-    promise.connection = connection;
-
-    return promise;
   }
 
   interceptRequest (err, req:IRequest) {
@@ -106,4 +100,14 @@ function fullUrl (url:string, params) {
   return url + toQueryString(params, url.indexOf('?') > -1);
 }
 
-export {Http, fullUrl};
+function objectToMap (object) {
+  var map = new Map(), key;
+  for (key in object) {
+    if (object.hasOwnProperty(key)) {
+      map.set(key, object[key]);
+    }
+  }
+  return map;
+}
+
+export {Http, fullUrl, objectToMap};

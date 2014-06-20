@@ -1,4 +1,4 @@
-import {Http, fullUrl} from '../src/Http';
+import {Http, fullUrl, objectToMap} from '../src/Http';
 import {XHRConnection} from '../src/XHRConnection';
 import {assert} from 'assert';
 import {IConnection} from '../src/IConnection';
@@ -63,23 +63,6 @@ describe('Http', function() {
         http.request({method: 'GET', url: '/users', data: {interests: 'JavaScript'}});
         PromiseBackend.flush(true);
         expect(sendSpy.calls.all()[0].args[0]).toBe('{"interests":"JavaScript"}');
-      });
-    });
-
-
-    it('should create a new Connection from XHRConnection if no ConnectionClass provided',
-        function(){
-          expect(http.request(defaultConfig).connection).toBeInstanceOf(XHRConnection);
-        });
-
-
-    it('should use provided ConnectionClass to instantiate a Connection', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var request = http.request({method: 'GET', url: '/users',
-          ConnectionClass: ConnectionMock
-        });
-        PromiseBackend.flush(true);
-        expect(request.connection).toBeInstanceOf(ConnectionMock);
       });
     });
 
@@ -377,5 +360,17 @@ describe('fullUrl()', function() {
   it('should append query parameters if parameters already exist', function() {
     var params = {name: 'Jeff'};
     expect(fullUrl('/users?hair=brown', params)).toBe('/users?hair=brown&name=Jeff');
+  });
+});
+
+
+describe('objectToMap', function() {
+  it('should return a map', function() {
+    assert.type(objectToMap(), Map);
+  });
+
+
+  it('should add properties to the map from provided object', function() {
+    expect(objectToMap({foo: 'bar'}).get('foo')).toBe('bar');
   });
 });
