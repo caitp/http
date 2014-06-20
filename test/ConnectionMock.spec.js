@@ -7,8 +7,13 @@ import {inject, use} from 'di/testing';
 import {PromiseBackend} from 'deferred/PromiseMock';
 
 describe('ConnectionMockBackend', function() {
+  beforeEach(function() {
+    PromiseBackend.patchWithMock();
+  });
+
   afterEach(function() {
     delete ConnectionMockBackend.connections;
+    PromiseBackend.restoreNativePromise();
   });
 
 
