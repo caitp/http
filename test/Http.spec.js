@@ -5,7 +5,7 @@ import {IConnection} from '../src/IConnection';
 import {Injector} from 'di/injector';
 import {inject, use} from 'di/testing';
 import {ConnectionMock, ConnectionMockBackend, ConnectionMockFactory} from './mocks/ConnectionMock';
-import {PromiseBackend} from 'deferred/PromiseMock';
+import {PromiseBackend} from 'prophecy/PromiseMock';
 
 describe('Http', function() {
   var http, defaultConfig;
@@ -114,7 +114,7 @@ describe('Http', function() {
       ConnectionMockBackend.forkZone().run(function() {
         var headerSpy = spyOn(XHRConnection.prototype, 'setRequestHeader');
         function interceptor(err, request, next) {
-          request.headers['Client'] = 'Browser';
+          request.headers.set('Client', 'Browser');
           next();
         }
         http.globalInterceptors.request.push(interceptor);

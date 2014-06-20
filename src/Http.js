@@ -34,9 +34,9 @@ class Http {
       };
 
       function setHeaders() {
-        Object.keys(request.headers).forEach(function(key) {
-          connection.setRequestHeader(key, request.headers[key]);
-        });
+        for (var key of request.headers.keys()) {
+          connection.setRequestHeader(key, request.headers.get(key));
+        }
       }
 
       function openConnection() {
@@ -102,6 +102,7 @@ function fullUrl (url:string, params) {
 
 function objectToMap (object) {
   var map = new Map(), key;
+  if (!object) return map;
   for (key in object) {
     if (object.hasOwnProperty(key)) {
       map.set(key, object[key]);
