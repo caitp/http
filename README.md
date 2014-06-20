@@ -1,4 +1,4 @@
-## Angular 2.0 HTTP Module
+## Angular 2.0 HTTP Module [![Build Status](https://travis-ci.org/angular/http.svg?branch=master)](https://travis-ci.org/angular/http)
 
 ### Status: In-Development
 
