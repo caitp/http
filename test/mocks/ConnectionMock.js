@@ -1,6 +1,6 @@
-import {Deferred} from 'deferred/Deferred';
+import {Deferred} from 'prophecy/Deferred';
 import {IConnection} from '../../src/IConnection';
-import {PromiseBackend} from 'deferred/PromiseMock';
+import {PromiseBackend} from 'prophecy/PromiseMock';
 
 export class ResponseMap extends Map {
   constructor() {

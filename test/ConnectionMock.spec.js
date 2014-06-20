@@ -1,10 +1,10 @@
 import {request} from '../src/Http';
 import {assert} from 'assert';
 import {ConnectionMock, ConnectionMockBackend, ResponseMap} from './mocks/ConnectionMock';
-import {Deferred} from 'deferred/Deferred';
+import {Deferred} from 'prophecy/Deferred';
 import {IConnection} from '../src/IConnection';
 import {inject, use} from 'di/testing';
-import {PromiseBackend} from 'deferred/PromiseMock';
+import {PromiseBackend} from 'prophecy/PromiseMock';
 
 describe('ConnectionMockBackend', function() {
   beforeEach(function() {

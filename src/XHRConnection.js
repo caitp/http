@@ -1,6 +1,6 @@
 import {Inject} from 'di/annotations';
 import {Injector} from 'di/injector';
-import {Deferred} from 'deferred/Deferred';
+import {Deferred} from 'prophecy/Deferred';
 import {assert} from 'assert';
 
 var XHRDataTypes = assert.define('XHRDataTypes', (value) => {

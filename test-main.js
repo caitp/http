@@ -21,7 +21,7 @@
       'q': './node_modules/di/node_modules/q/q',
       'di': './node_modules/di/src',
       'assert': './node_modules/rtts-assert/src/assert',
-      'deferred': './node_modules/deferred/src'
+      'prophecy': './node_modules/prophecy/src'
     },
 
     // Dynamically load all test files and ES6 polyfill.

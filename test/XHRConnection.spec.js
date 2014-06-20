@@ -2,7 +2,7 @@ import {XHRConnection} from '../src/XHRConnection';
 import {assert} from 'assert';
 import {IConnection} from '../src/IConnection';
 import {inject} from 'di/testing';
-import {PromiseBackend, PromiseMock} from 'deferred/PromiseMock';
+import {PromiseBackend, PromiseMock} from 'prophecy/PromiseMock';
 
 describe('XHRConnection', function() {
   it('should implement IConnection', function() {
