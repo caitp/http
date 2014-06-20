@@ -24,7 +24,9 @@ module.exports = function(config) {
       'node_modules/rtts-assert/src/**/*.js': ['traceur'],
       'src/**/*.js': ['traceur'],
       'test/**/*.js': ['traceur'],
-    }
+    },
+
+    reporters: ['dots']
   });
 
   // this should be in shared config (pipe)
