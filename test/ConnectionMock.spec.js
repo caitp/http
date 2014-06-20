@@ -150,7 +150,7 @@ describe('ConnectionMockBackend', function() {
     it('should return a new zone from PromiseBackend', function() {
       var forked = ConnectionMockBackend.forkZone();
       assert.type(forked, Zone);
-      expect(forked.onZoneEnter.toString()).toContain('patchWithMock()');
+      expect(forked.beforeTask.toString()).toContain('patchWithMock()');
     });
   })
 });
