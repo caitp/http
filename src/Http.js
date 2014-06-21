@@ -46,14 +46,14 @@ class Http {
       }
 
       function onResponse (response) {
-        return http.interceptResponse(undefined, request, response);
+        return http.intercept(null, request, response, 'response');
       }
 
       function onResponseError (reason) {
-        return http.interceptResponse(reason, request);
+        return http.intercept(reason, request, null, 'response');
       }
 
-      http.interceptRequest(undefined, request).
+      http.intercept({req: request, key: 'request'}).
         then(setHeaders).
         then(openConnection).
         then(onResponse, onResponseError).
@@ -61,38 +61,24 @@ class Http {
     });
   }
 
-  interceptRequest (err, req:IRequest) {
-    var http = this;
+  intercept ({err, req, res, key}) {
+    assert.type(req, IRequest);
+    res && assert.type(res, IResponse);
+    var http = this,
+        i = 0,
+        args = arguments;
 
-    return new Promise(function(resolve, reject) {
-      var i = 0;
-      function callNext(error) {
-        err = error || err;
-        if (i === http.globalInterceptors.request.length) {
-          if (err) return reject(err);
-          resolve(req);
-        }
-        http.globalInterceptors.request[i++](err, req, callNext);
-      }
-      callNext();
-    });
-  }
+    return callNext();
 
-  interceptResponse (err, req:IRequest, res) {
-    var http = this;
-    if (res) assert.type(res, IResponse);
-    return new Promise(function(resolve, reject) {
-      var i = 0;
-      function callNext(error) {
-        err = error || err;
-        if (i === http.globalInterceptors.response.length) {
-          if (err) return reject(err);
-          resolve(res);
-        }
-        http.globalInterceptors.response[i++](err, req, res, callNext);
+    function callNext() {
+      if (i === http.globalInterceptors[key].length) {
+        if (err) return Promise.reject(err);
+        return Promise.resolve(key === 'request' ? req : res);
       }
-      callNext();
-    });
+      else {
+        return Promise.resolve(http.globalInterceptors[key][i++](err, req, res)).then(callNext);
+      }
+    }
   }
 }
 
