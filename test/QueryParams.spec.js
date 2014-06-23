@@ -2,33 +2,43 @@ import {encodeValue, toQueryString} from '../src/QueryParams';
 
 describe('toQueryString()', function() {
   it('should do basic request with params and encode', function() {
-    var queryParams = {'a=':'?&', b:2};
-    expect(toQueryString(queryParams)).toBe('?a%3D=%3F%26&b=2');
+    var queryParams = new Map();
+    queryParams.set('a=', '?&');
+    queryParams.set('b', 2);
+    expect(toQueryString(queryParams)).toBe('a%3D=%3F%26&b=2');
   });
 
 
   it('should merge params if url contains some already', function() {
-    var queryParams = {a:1, b:2};
-    expect(toQueryString(queryParams, true)).toBe('&a=1&b=2');
+    var queryParams = new Map();
+    queryParams.set('a', 1);
+    queryParams.set('b', 2);
+    expect(toQueryString(queryParams, true)).toBe('a=1&b=2');
   });
 
 
   it('should jsonify objects in params map', function() {
-    var queryParams = {a:1, b:{c:3}};
-    expect(toQueryString(queryParams)).toBe('?a=1&b=%7B%22c%22:3%7D')
+    var queryParams = new Map();
+    queryParams.set('a', 1);
+    queryParams.set('b', {c:3});
+    expect(toQueryString(queryParams)).toBe('a=1&b=%7B%22c%22:3%7D')
   });
 
 
   it('should expand arrays in params map', function() {
-    var queryParams = {a: [1,2,3]};
-    expect(toQueryString(queryParams)).toBe('?a=1&a=2&a=3')
+    var queryParams = new Map();
+    queryParams.set('a', [1,2,3]);
+    expect(toQueryString(queryParams)).toBe('a=1&a=2&a=3')
   });
 
 
   it('should not encode @ in url params', function() {
-    var queryParams = {':bar': '$baz@1', '!do&h': 'g=a h'};
+    var queryParams = new Map();
+    queryParams.set(':bar', '$baz@1');
+    queryParams.set('!do&h', 'g=a h');
+
     expect(toQueryString(queryParams)).
-        toBe('?!do%26h=g%3Da+h&:bar=$baz@1');
+        toBe(':bar=$baz@1&!do%26h=g%3Da+h');
   });
 });
 

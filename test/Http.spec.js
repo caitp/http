@@ -276,13 +276,14 @@ describe('Http', function() {
 
 describe('fullUrl()', function() {
   it('should serialize query parameters and add to url', function() {
-    var params = {name: 'Jeff'};
+    var params = new Map();
+    params.set('name', 'Jeff');
     expect(fullUrl('/users', params)).toBe('/users?name=Jeff');
   });
 
 
   it('should append query parameters if parameters already exist', function() {
-    var params = {name: 'Jeff'};
+    var params = new Map().set('name','Jeff');
     expect(fullUrl('/users?hair=brown', params)).toBe('/users?hair=brown&name=Jeff');
   });
 });

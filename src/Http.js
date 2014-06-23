@@ -82,8 +82,9 @@ class Http {
   }
 }
 
-function fullUrl (url:string, params) {
-  return url + toQueryString(params, url.indexOf('?') > -1);
+function fullUrl (url:string, params:Map) {
+  var separator = url.indexOf('?') > -1 ? '&' : '?';
+  return `${url}${separator}${toQueryString(params)}`;
 }
 
 function objectToMap (object) {

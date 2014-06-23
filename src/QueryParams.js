@@ -1,28 +1,21 @@
 import {assert} from 'assert';
 
 /**
- * Serialize the parameters into a queryString, including the leading "?" or
- * "&". If isAppended is truthy, the queryString should begin with "&".
+ * Serialize the parameters into a queryString, not including the leading "?" or
+ * "&".
  */
-function toQueryString (params, isAppended) {
-  var queryString, orderedKeys, key, encodedKey, value;
-  if (typeof isAppended !== 'undefined') {
-    assert.type(isAppended, assert.boolean);
-  }
-  if (Object.keys(params).length === 0) return '';
+function toQueryString (params:Map) {
+  var queryString = '',
+      i = 0,
+      orderedKeys, key, encodedKey, value;
 
-  queryString = isAppended ? '&' : '?';
-  orderedKeys = Object.keys(params).sort();
-
-  while (key = orderedKeys.shift()) {
+  for (key of params.keys()) {
     encodedKey = encodeValue(key);
     queryString += encodedKey;
     queryString += '=';
-    value = params[key];
-
-
+    value = params.get(key);
     queryString += encodeValue(value, encodedKey);
-    queryString += orderedKeys.length ? '&' : '';
+    queryString += ++i < params.size ? '&' : '';
   }
 
   return queryString;
