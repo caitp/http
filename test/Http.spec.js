@@ -360,6 +360,12 @@ describe('fullUrl()', function() {
     var params = new Map().set('name','Jeff');
     expect(fullUrl('/users?hair=brown', params)).toBe('/users?hair=brown&name=Jeff');
   });
+
+
+  it('should remove hash fragment if present in url', function() {
+    var params = new Map().set('title', 'Dr.');
+    expect(fullUrl('/users?hair=brown#some-label', params)).toBe('/users?hair=brown&title=Dr.');
+  });
 });
 
 

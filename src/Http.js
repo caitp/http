@@ -95,7 +95,11 @@ class Http {
 }
 
 function fullUrl (url:string, params:Map) {
-  var separator = url.indexOf('?') > -1 ? '&' : '?';
+  var hash = url.indexOf('#'), separator;
+  if (hash >= 0) {
+    url = url.substring(0, hash);
+  }
+  separator = url.indexOf('?') > -1 ? '&' : '?';
   return `${url}${separator}${toQueryString(params)}`;
 }
 
