@@ -25,6 +25,10 @@ class Http {
   }
 
   fullUrl (url:string, params) {
+    var hash = url.indexOf('#');
+    if (hash >= 0) {
+      url = url.substring(0, hash);
+    }
     return url + toQueryString(params, url.indexOf('?') > -1);
   }
 }

@@ -114,5 +114,11 @@ describe('Http', function() {
       var params = {name: 'Jeff'};
       expect(http.fullUrl('/users?hair=brown', params)).toBe('/users?hair=brown&name=Jeff');
     });
+
+
+    it('should remove hash fragment if present in url', function() {
+      var params = {title: 'Dr.'};
+      expect(http.fullUrl('/users?hair=brown#some-label', params)).toBe('/users?hair=brown&title=Dr.');
+    });
   });
 });
