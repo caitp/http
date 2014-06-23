@@ -8,10 +8,15 @@ import {IRequest} from './IRequest';
 
 class Http {
   constructor () {
-    this.globalInterceptors = {
-      request: [],
-      response: []
-    };
+    Object.defineProperty(this, 'globalInterceptors', {
+      configurable: false,
+      value: {
+        response: [],
+        request: []
+      }
+    });
+    // Prevent response and request from being reassigned
+    Object.freeze(this.globalInterceptors);
   }
 
   request (config) {

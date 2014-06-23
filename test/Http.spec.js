@@ -33,6 +33,25 @@ describe('Http', function() {
         response: []
       });
     });
+
+
+    it('should freeze the globalInterceptors', function() {
+      expect(function() {
+        http.globalInterceptors = 'foo';
+      }).toThrow();
+
+      expect(function() {
+        http.globalInterceptors.response = 'foo';
+      }).toThrow();
+
+      expect(function() {
+        http.globalInterceptors.request = 'foo';
+      }).toThrow();
+
+      expect(function() {
+        http.globalInterceptors.request.push(function() {});
+      }).not.toThrow();
+    });
   });
 
 
