@@ -51,6 +51,10 @@ export class JSONPConnection {
     this.promise.then(null, callback);
   }
 
+  setRequestHeader() {
+    //no-op to make IConnection happy
+  }
+
   /**
    * Called when the request transfer is completed, regardless of the status of
    * the response.

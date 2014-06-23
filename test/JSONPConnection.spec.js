@@ -83,6 +83,4 @@ describe('JSONPConnection', function() {
       assert.type(new JSONPConnection().promise, Promise);
     })
   });
-
-  
 });
