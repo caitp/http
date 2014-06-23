@@ -13,7 +13,13 @@ describe('Http', function() {
   beforeEach(inject(Http, function(_http_) {
     defaultConfig = {method: 'GET', url: '/users'};
     http = _http_;
+    PromiseBackend.patchWithMock();
   }));
+
+  afterEach(function() {
+    PromiseBackend.restoreNativePromise();
+  })
+
 
   describe('constructor', function() {
     it('should be injectable', inject(Http, function(http) {
@@ -39,31 +45,25 @@ describe('Http', function() {
 
 
     it('should complain if method is not a string', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var spy = jasmine.createSpy('rejectSpy');
-        http.request({method: undefined, url: '/users'}).then(null, spy);
-        PromiseBackend.flush(true);
-        expect(spy).toHaveBeenCalled();
-      });
+      var spy = jasmine.createSpy('rejectSpy');
+      http.request({method: undefined, url: '/users'}).then(null, spy);
+      PromiseBackend.flush(true);
+      expect(spy).toHaveBeenCalled();
     });
 
 
     it('should complain if url is not a string', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var spy = jasmine.createSpy('rejectSpy');
-        http.request({method: 'GET', url: undefined}).then(null, spy);
-        PromiseBackend.flush(true);
-        expect(spy).toHaveBeenCalled();
-      });
+      var spy = jasmine.createSpy('rejectSpy');
+      http.request({method: 'GET', url: undefined}).then(null, spy);
+      PromiseBackend.flush(true);
+      expect(spy).toHaveBeenCalled();
     });
 
 
     it('should serialize data before calling open', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        http.request({method: 'GET', url: '/users', data: {interests: 'JavaScript'}});
-        PromiseBackend.flush(true);
-        expect(sendSpy.calls.all()[0].args[0]).toBe('{"interests":"JavaScript"}');
-      });
+      http.request({method: 'GET', url: '/users', data: {interests: 'JavaScript'}});
+      PromiseBackend.flush(true);
+      expect(sendSpy.calls.all()[0].args[0]).toBe('{"interests":"JavaScript"}');
     });
 
 
@@ -73,31 +73,24 @@ describe('Http', function() {
 
 
     it('should call open on the connection', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        http.request(defaultConfig);
-        PromiseBackend.flush(true);
-        expect(openSpy).toHaveBeenCalledWith('GET', '/users');
-      });
+      http.request(defaultConfig);
+      PromiseBackend.flush(true);
+      expect(openSpy).toHaveBeenCalledWith('GET', '/users');
     });
 
 
     it('should call send on the connection', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        http.request(defaultConfig);
-        PromiseBackend.flush(true);
-        expect(sendSpy).toHaveBeenCalled();
-      });
+      http.request(defaultConfig);
+      PromiseBackend.flush(true);
+      expect(sendSpy).toHaveBeenCalled();
     });
 
 
     it('should pass data to send', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var data = '{"user" : "jeffbcross"}';
-        http.request({method: 'GET', url: '/users', data: data});
-        PromiseBackend.flush(true);
-        expect(sendSpy).toHaveBeenCalledWith(data);
-      });
-
+      var data = '{"user" : "jeffbcross"}';
+      http.request({method: 'GET', url: '/users', data: data});
+      PromiseBackend.flush(true);
+      expect(sendSpy).toHaveBeenCalledWith(data);
     });
 
 
@@ -111,62 +104,54 @@ describe('Http', function() {
 
 
     it('should apply request headers set in the interceptor', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var headerSpy = spyOn(XHRConnection.prototype, 'setRequestHeader');
-        function interceptor(err, request) {
-          request.headers.set('Client', 'Browser');
-          return request;
-        }
-        http.globalInterceptors.request.push(interceptor);
-        http.request(defaultConfig);
-        PromiseBackend.flush(true);
-        expect(headerSpy).toHaveBeenCalledWith('Client', 'Browser');
-      });
+      var headerSpy = spyOn(XHRConnection.prototype, 'setRequestHeader');
+      function interceptor(err, request) {
+        request.headers.set('Client', 'Browser');
+        return request;
+      }
+      http.globalInterceptors.request.push(interceptor);
+      http.request(defaultConfig);
+      PromiseBackend.flush(true);
+      expect(headerSpy).toHaveBeenCalledWith('Client', 'Browser');
     });
 
 
     it('should call intercept with the Request object', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var spy = spyOn(http, 'intercept').and.callThrough();
-        http.request({method: 'GET', url: '/something'});
-        PromiseBackend.flush(true);
-        expect(spy).toHaveBeenCalled();
-        expect(spy.calls.argsFor(0)[0].req.method).toBe('GET');
-        expect(spy.calls.argsFor(0)[0].req.url).toBe('/something');
-      });
+      var spy = spyOn(http, 'intercept').and.callThrough();
+      http.request({method: 'GET', url: '/something'});
+      PromiseBackend.flush(true);
+      expect(spy).toHaveBeenCalled();
+      expect(spy.calls.argsFor(0)[0].req.method).toBe('GET');
+      expect(spy.calls.argsFor(0)[0].req.url).toBe('/something');
     });
 
 
     it('should call intercept with the raw response upon successful request', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var spy = spyOn(http, 'intercept').and.callThrough();
-        ConnectionMockBackend.whenRequest('GET', '/users').respond(200, 'rawbody');
-        http.request({
-          method: 'GET',
-          url: '/users',
-          ConnectionClass: ConnectionMock
-        }).then(spy);
-        PromiseBackend.flush(true);
-        ConnectionMockBackend.flush();
-        expect(spy).toHaveBeenCalled();
-        expect(spy.calls.count()).toBe(2);
-      });
+      var spy = spyOn(http, 'intercept').and.callThrough();
+      ConnectionMockBackend.whenRequest('GET', '/users').respond(200, 'rawbody');
+      http.request({
+        method: 'GET',
+        url: '/users',
+        ConnectionClass: ConnectionMock
+      }).then(spy);
+      PromiseBackend.flush(true);
+      ConnectionMockBackend.flush();
+      expect(spy).toHaveBeenCalled();
+      expect(spy.calls.count()).toBe(2);
     });
 
 
     it('should call intercept with an error failure', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var spy = spyOn(http, 'intercept').and.callThrough();
-        ConnectionMockBackend.whenRequest('GET', '/users').respond(404, 'error: not found');
-        http.request({
-          method: 'GET',
-          url: '/users',
-          ConnectionClass: ConnectionMock
-        });
-        PromiseBackend.flush(true);
-        ConnectionMockBackend.flush(true);
-        expect(spy.calls.argsFor(1)[0]).toBe('error: not found');
+      var spy = spyOn(http, 'intercept').and.callThrough();
+      ConnectionMockBackend.whenRequest('GET', '/users').respond(404, 'error: not found');
+      http.request({
+        method: 'GET',
+        url: '/users',
+        ConnectionClass: ConnectionMock
       });
+      PromiseBackend.flush(true);
+      ConnectionMockBackend.flush(true);
+      expect(spy.calls.argsFor(1)[0]).toBe('error: not found');
     });
 
 
@@ -213,85 +198,77 @@ describe('Http', function() {
 
 
     it('should process the response through globalInterceptors', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var goodSpy = jasmine.createSpy('goodSpy');
-        var badSpy = jasmine.createSpy('badSpy');
-        http.globalInterceptors.response.push(function(err, req, res) {
-          res.body = res.body.replace('fo','intercepted');
-          return res;
-        });
-        http.intercept({
-          req: sampleRequest,
-          res: sampleResponse,
-          key: 'response'
-        }).then(goodSpy, badSpy);
-        PromiseBackend.flush(true);
-        expect(goodSpy).toHaveBeenCalled();
-        expect(goodSpy.calls.argsFor(0)[0].body).toBe('interceptedo');
-        expect(badSpy).not.toHaveBeenCalled();
+      var goodSpy = jasmine.createSpy('goodSpy');
+      var badSpy = jasmine.createSpy('badSpy');
+      http.globalInterceptors.response.push(function(err, req, res) {
+        res.body = res.body.replace('fo','intercepted');
+        return res;
       });
+      http.intercept({
+        req: sampleRequest,
+        res: sampleResponse,
+        key: 'response'
+      }).then(goodSpy, badSpy);
+      PromiseBackend.flush(true);
+      expect(goodSpy).toHaveBeenCalled();
+      expect(goodSpy.calls.argsFor(0)[0].body).toBe('interceptedo');
+      expect(badSpy).not.toHaveBeenCalled();
     });
 
 
     it('should call reject if called with an error object', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var goodSpy = jasmine.createSpy('goodSpy');
-        var badSpy = jasmine.createSpy('badSpy');
-        var error = {foo: 'bar'};
-        http.globalInterceptors.response.push(function(err, req, res) {
-          res.body = res.body.replace('raw','intercepted');
-          return res;
-        });
-        http.intercept({
-          err: error,
-          req: sampleRequest,
-          res: sampleResponse,
-          key: 'response'
-        }).then(goodSpy, badSpy);
-        PromiseBackend.flush(true);
-        expect(badSpy).toHaveBeenCalledWith(error);
-        expect(goodSpy).not.toHaveBeenCalled();
+      var goodSpy = jasmine.createSpy('goodSpy');
+      var badSpy = jasmine.createSpy('badSpy');
+      var error = {foo: 'bar'};
+      http.globalInterceptors.response.push(function(err, req, res) {
+        res.body = res.body.replace('raw','intercepted');
+        return res;
       });
+      http.intercept({
+        err: error,
+        req: sampleRequest,
+        res: sampleResponse,
+        key: 'response'
+      }).then(goodSpy, badSpy);
+      PromiseBackend.flush(true);
+      expect(badSpy).toHaveBeenCalledWith(error);
+      expect(goodSpy).not.toHaveBeenCalled();
     });
 
 
     it('should call reject if an error is ever passed to next', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var goodSpy = jasmine.createSpy('goodSpy');
-        var badSpy = jasmine.createSpy('badSpy');
-        var error = {foo: 'bar'};
-        http.globalInterceptors.response.push(function(err, req, res) {
-          res.body = res.body.replace('raw','intercepted');
-          return Promise.reject(error);
-        });
-        http.intercept({
-          req: sampleRequest,
-          res: sampleResponse,
-          key: 'response'
-        }).then(goodSpy, badSpy);
-        PromiseBackend.flush(true);
-        expect(badSpy).toHaveBeenCalledWith(error);
-        expect(goodSpy).not.toHaveBeenCalled();
+      var goodSpy = jasmine.createSpy('goodSpy');
+      var badSpy = jasmine.createSpy('badSpy');
+      var error = {foo: 'bar'};
+      http.globalInterceptors.response.push(function(err, req, res) {
+        res.body = res.body.replace('raw','intercepted');
+        return Promise.reject(error);
       });
+      http.intercept({
+        req: sampleRequest,
+        res: sampleResponse,
+        key: 'response'
+      }).then(goodSpy, badSpy);
+      PromiseBackend.flush(true);
+      expect(badSpy).toHaveBeenCalledWith(error);
+      expect(goodSpy).not.toHaveBeenCalled();
     });
 
 
     it('should process a request through globalInterceptors', function() {
-      ConnectionMockBackend.forkZone().run(function() {
-        var goodSpy = jasmine.createSpy('goodSpy');
-        var badSpy = jasmine.createSpy('badSpy');
-        http.globalInterceptors.request.push(function(err, req) {
-          req.headers.sender = 'Jeff';
-          return req;
-        });
-        http.intercept({
-          req: sampleRequest,
-          key: 'request'
-        }).then(goodSpy);
-        PromiseBackend.flush(true);
-        expect(goodSpy.calls.argsFor(0)[0].headers.sender).toBe('Jeff');
-        expect(badSpy).not.toHaveBeenCalled();
+      var goodSpy = jasmine.createSpy('goodSpy');
+      var badSpy = jasmine.createSpy('badSpy');
+      http.globalInterceptors.request.push(function(err, req) {
+        req.headers.sender = 'Jeff';
+        return req;
       });
+      http.intercept({
+        req: sampleRequest,
+        key: 'request'
+      }).then(goodSpy);
+      PromiseBackend.flush(true);
+      expect(goodSpy.calls.argsFor(0)[0].headers.sender).toBe('Jeff');
+      expect(badSpy).not.toHaveBeenCalled();
     });
   });
 });
