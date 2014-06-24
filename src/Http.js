@@ -66,22 +66,28 @@ class Http {
     });
   }
 
-  intercept ({err, req, res, key}) {
+  intercept (resolution) {
+    var {err, req, res, key} = resolution;
     assert.type(req, IRequest);
     res && assert.type(res, IResponse);
     var http = this,
         i = 0,
         args = arguments;
 
-    return callNext();
+    return callNext(resolution);
 
-    function callNext() {
-      if (i === http.globalInterceptors[key].length) {
-        if (err) return Promise.reject(err);
-        return Promise.resolve(key === 'request' ? req : res);
+    function callNext(resolution) {
+      var {err, req, res} = resolution;
+      var nextAction = err ? 'reject' : 'resolve';
+      var interceptTuple = http.globalInterceptors[key][i];
+      if (i++ === http.globalInterceptors[key].length) {
+        return Promise[nextAction](resolution);
+      }
+      else if (interceptTuple[nextAction]) {
+        return Promise[nextAction](interceptTuple[nextAction](resolution)).then(callNext, callNext);
       }
       else {
-        return Promise.resolve(http.globalInterceptors[key][i++](err, req, res)).then(callNext);
+        return Promise[nextAction](resolution).then(callNext, callNext);
       }
     }
   }
