@@ -118,6 +118,7 @@ describe('Http', function() {
       spy.and.returnValue({headers:{}});
       http.globalInterceptors.request.push({resolve:spy});
       http.request(defaultConfig);
+      PromiseBackend.flush(true);
       expect(spy).toHaveBeenCalled();
     });
 
@@ -172,7 +173,7 @@ describe('Http', function() {
       });
       PromiseBackend.flush(true);
       ConnectionMockBackend.flush(true);
-      expect(spy.calls.argsFor(1)[0]).toBe('error: not found');
+      expect(spy.calls.count()).toBe(2);
     });
 
 
@@ -211,10 +212,18 @@ describe('Http', function() {
         responseText: 'foo',
         status: 200
       }
-    })
+    });
+
+
+    it('should complain if resolution does not match IInterceptResolution', function() {
+      expect(function() {
+        http.intercept();
+      }).toThrowError(/Invalid arguments given!/);
+    });
+
 
     it('should return a promise', function() {
-      assert.type(http.intercept({req: sampleRequest, res: sampleResponse, key:'response'}).then, Function);
+      assert.type(http.intercept({req: sampleRequest, res: sampleResponse, interceptType: 'response'}).then, Function);
     });
 
 
@@ -230,7 +239,7 @@ describe('Http', function() {
       http.intercept({
         req: sampleRequest,
         res: sampleResponse,
-        key: 'response'
+        interceptType: 'response'
       }).then(goodSpy, badSpy);
       PromiseBackend.flush(true);
       expect(goodSpy).toHaveBeenCalled();
@@ -243,30 +252,65 @@ describe('Http', function() {
       var goodSpy = jasmine.createSpy('goodSpy');
       var badSpy = jasmine.createSpy('badSpy');
       var error = {foo: 'bar'};
+      var interceptorCalled = false;
       http.globalInterceptors.response.push({
-        resolve ({err, req, res}) {
+        reject ({err, req, res}) {
+          interceptorCalled = true;
           res.body = res.body.replace('raw','intercepted');
-          return {err, res};
+          return Project.reject({err, res});
         }
       });
       http.intercept({
         err: error,
         req: sampleRequest,
         res: sampleResponse,
-        key: 'response'
+        interceptType: 'response'
       }).then(goodSpy, badSpy);
       PromiseBackend.flush(true);
+      expect(interceptorCalled).toBe(true);
       expect(badSpy).toHaveBeenCalled();
       expect(goodSpy).not.toHaveBeenCalled();
     });
 
 
-    it('should call reject if an error is ever passed to next', function() {
+    it('should allow saving a failed response', function() {
+      var finalGoodSpy = jasmine.createSpy('finalGoodSpy');
+      var finalBadSpy = jasmine.createSpy('finalBadSpy');
+      var error = {foo: 'bar'};
+      var interceptorCount = 0;
+
+      http.globalInterceptors.response.push({
+        resolve ({err, req, res}) {
+          interceptorCount++;
+          return Promise.reject({err, res});
+        }
+      });
+      http.globalInterceptors.response.push({
+        reject ({err, req, res}) {
+          interceptorCount++;
+          return Promise.resolve({err, res});
+        }
+      });
+      http.intercept({
+        req: sampleRequest,
+        res: sampleResponse,
+        interceptType: 'response'
+      }).then(finalGoodSpy, finalBadSpy);
+      PromiseBackend.flush(true);
+      expect(interceptorCount).toBe(2);
+      expect(finalBadSpy).not.toHaveBeenCalled();
+      expect(finalGoodSpy).toHaveBeenCalled();
+    });
+
+
+    it('should call reject if an interceptor rejects', function() {
       var goodSpy = jasmine.createSpy('goodSpy');
       var badSpy = jasmine.createSpy('badSpy');
       var error = {foo: 'bar'};
+      var interceptorCalled = false;
       http.globalInterceptors.response.push({
         resolve ({err, req, res}) {
+          interceptorCalled = true;
           res.body = res.body.replace('raw','intercepted');
           return Promise.reject({err: error, req, res});
         }
@@ -274,9 +318,10 @@ describe('Http', function() {
       http.intercept({
         req: sampleRequest,
         res: sampleResponse,
-        key: 'response'
+        interceptType: 'response'
       }).then(goodSpy, badSpy);
       PromiseBackend.flush(true);
+      expect(interceptorCalled).toBe(true);
       expect(badSpy).toHaveBeenCalled();
       expect(goodSpy).not.toHaveBeenCalled();
     });
@@ -293,7 +338,7 @@ describe('Http', function() {
       });
       http.intercept({
         req: sampleRequest,
-        key: 'request'
+        interceptType: 'request'
       }).then(goodSpy);
       PromiseBackend.flush(true);
       expect(goodSpy.calls.argsFor(0)[0].req.headers.get('sender')).toBe('Jeff');

@@ -1,8 +1,10 @@
+import {Deferred} from 'prophecy/Deferred';
 import {XHRConnection} from './XHRConnection';
 import {assert} from 'assert';
 import {serialize} from './Serialize';
 import {toQueryString} from './QueryParams';
 import {Provide} from 'di/annotations';
+import {IInterceptResolution} from './IInterceptResolution';
 import {IResponse} from './IResponse';
 import {IRequest} from './IRequest';
 
@@ -51,14 +53,22 @@ class Http {
       }
 
       function onResponse (response) {
-        return http.intercept(null, request, response, 'response');
+        return http.intercept({
+          req: request,
+          res: response,
+          interceptType: 'response'
+        });
       }
 
       function onResponseError (reason) {
-        return http.intercept(reason, request, null, 'response');
+        return http.intercept({
+          err: reason,
+          req: request,
+          interceptType: 'response'
+        });
       }
 
-      http.intercept({req: request, key: 'request'}).
+      http.intercept({req: request, interceptType: 'request'}).
         then(setHeaders).
         then(openConnection).
         then(onResponse, onResponseError).
@@ -66,30 +76,21 @@ class Http {
     });
   }
 
-  intercept (resolution) {
-    var {err, req, res, key} = resolution;
-    assert.type(req, IRequest);
-    res && assert.type(res, IResponse);
-    var http = this,
-        i = 0,
-        args = arguments;
+  /**
+   * Creates a promise chain of interceptors from the globalInterceptors
+   * object, based on the 'interceptType' property of resolution
+   */
+  intercept (resolution:IInterceptResolution) {
+    var deferred = new Deferred(),
+        interceptors;
 
-    return callNext(resolution);
-
-    function callNext(resolution) {
-      var {err, req, res} = resolution;
-      var nextAction = err ? 'reject' : 'resolve';
-      var interceptTuple = http.globalInterceptors[key][i];
-      if (i++ === http.globalInterceptors[key].length) {
-        return Promise[nextAction](resolution);
-      }
-      else if (interceptTuple[nextAction]) {
-        return Promise[nextAction](interceptTuple[nextAction](resolution)).then(callNext, callNext);
-      }
-      else {
-        return Promise[nextAction](resolution).then(callNext, callNext);
-      }
+    for (var i = 0; i < this.globalInterceptors[resolution.interceptType].length; i++) {
+      interceptors = this.globalInterceptors[resolution.interceptType][i];
+      deferred.promise = deferred.promise.then(interceptors.resolve, interceptors.reject);
     }
+
+    deferred[resolution.err ? 'reject' : 'resolve'](resolution);
+    return deferred.promise;
   }
 }
 
