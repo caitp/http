@@ -13,7 +13,6 @@ module.exports = function(config) {
       {pattern: 'node_modules/rtts-assert/src/**/*.js', included: false},
       {pattern: 'node_modules/di/src/*.js', included: false},
       {pattern: 'node_modules/di/node_modules/es6-shim/es6-shim.js', included: false},
-      {pattern: 'node_modules/di/node_modules/q/q.js', included: false},
       {pattern: 'node_modules/prophecy/src/*.js', included: false},
       {pattern: 'node_modules/zone.js/zone.js', included: true}
     ],

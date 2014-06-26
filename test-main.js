@@ -18,7 +18,6 @@
     baseUrl: '/base',
 
     paths: {
-      'q': './node_modules/di/node_modules/q/q',
       'di': './node_modules/di/src',
       'assert': './node_modules/rtts-assert/src/assert',
       'prophecy': './node_modules/prophecy/src'
