@@ -357,13 +357,15 @@ describe('fullUrl()', function() {
 
 
   it('should append query parameters if parameters already exist', function() {
-    var params = new Map().set('name','Jeff');
+    var params = new Map();
+    params.set('name','Jeff');
     expect(fullUrl('/users?hair=brown', params)).toBe('/users?hair=brown&name=Jeff');
   });
 
 
   it('should remove hash fragment if present in url', function() {
-    var params = new Map().set('title', 'Dr.');
+    var params = new Map();
+    params.set('title', 'Dr.');
     expect(fullUrl('/users?hair=brown#some-label', params)).toBe('/users?hair=brown&title=Dr.');
   });
 });
