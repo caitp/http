@@ -8,6 +8,24 @@ import {IInterceptResolution} from './IInterceptResolution';
 import {IResponse} from './IResponse';
 import {IRequest} from './IRequest';
 
+function http$$setRequestHeaders(tuple) {
+  var key;
+  for (key of tuple.request.headers.keys()) {
+    tuple.connection.setRequestHeader(key, tuple.request.headers.get(key));
+  }
+  return tuple;
+}
+
+function http$$openConnection(tuple) {
+  tuple.connection.open(tuple.request.method, tuple.request.url);
+  return tuple;
+}
+
+function http$$sendRequest(tuple) {
+  tuple.connection.send(tuple.request.data);
+  return tuple.connection;
+}
+
 class Http {
   constructor () {
     Object.defineProperty(this, 'globalInterceptors', {
@@ -40,18 +58,6 @@ class Http {
         headers: objectToMap(headers)
       };
 
-      function setHeaders() {
-        for (var key of request.headers.keys()) {
-          connection.setRequestHeader(key, request.headers.get(key));
-        }
-      }
-
-      function openConnection() {
-        connection.open(request.method, request.url);
-        connection.send(request.data);
-        return connection;
-      }
-
       function onResponse (response) {
         return http.intercept({
           req: request,
@@ -69,8 +75,10 @@ class Http {
       }
 
       http.intercept({req: request, interceptType: 'request'}).
-        then(setHeaders).
-        then(openConnection).
+        then(() => ({request: request, connection: connection})).
+        then(http$$openConnection).
+        then(http$$setRequestHeaders).
+        then(http$$sendRequest).
         then(onResponse, onResponseError).
         then(resolve, reject);
     });

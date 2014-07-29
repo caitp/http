@@ -138,6 +138,25 @@ describe('Http', function() {
     });
 
 
+    it('should not throw when applying request headers', function() {
+      openSpy.and.callThrough();
+      var rejectedSpy = jasmine.createSpy('rejected');
+      var interceptor = {
+        resolve({err, req}) {
+          req.headers.set('Client', 'Browser');
+          return {err, req};
+        }
+      };
+      http.globalInterceptors.request.push(interceptor);
+      http.request(defaultConfig).then(null, rejectedSpy);
+      PromiseBackend.flush(true);
+
+      // Current promise mock will catch the exception and reject the promise --- we need to verify
+      // that this did not happen
+      expect(rejectedSpy).not.toHaveBeenCalled();
+    });
+
+
     it('should call intercept with the Request object', function() {
       var spy = spyOn(http, 'intercept').and.callThrough();
       http.request({method: 'GET', url: '/something'});
